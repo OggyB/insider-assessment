@@ -1,0 +1,181 @@
+definitions:
+  request.SchedulerRequest:
+    properties:
+      action:
+        description: |-
+          Action controls the scheduler. Allowed values:
+          - "start": start processing batches
+          - "stop":  stop processing batches
+        type: string
+    type: object
+  response.HealthPayload:
+    properties:
+      status:
+        type: string
+    type: object
+  response.HealthResponse:
+    properties:
+      data:
+        $ref: '#/definitions/response.HealthPayload'
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+  response.MessageDTO:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      messageId:
+        type: string
+      sentAt:
+        type: string
+      status:
+        type: string
+      to:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  response.SchedulerControlPayload:
+    properties:
+      message:
+        type: string
+    type: object
+  response.SchedulerControlResponse:
+    properties:
+      data:
+        $ref: '#/definitions/response.SchedulerControlPayload'
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+  response.SentMessagesPayload:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/response.MessageDTO'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+    type: object
+  response.SentMessagesResponse:
+    properties:
+      data:
+        $ref: '#/definitions/response.SentMessagesPayload'
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+  response.WelcomePayload:
+    properties:
+      message:
+        type: string
+    type: object
+  response.WelcomeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/response.WelcomePayload'
+      success:
+        type: boolean
+      timestamp:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /:
+    get:
+      description: Simple root endpoint that returns a welcome message.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.WelcomeResponse'
+      summary: Welcome endpoint
+      tags:
+      - home
+  /health:
+    get:
+      description: Returns a basic status payload to indicate the API is running.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.HealthResponse'
+      summary: Health check
+      tags:
+      - home
+  /messages/sent:
+    get:
+      description: Returns a paginated list of successfully sent messages.
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size (max 100)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SentMessagesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List sent messages
+      tags:
+      - messages
+  /scheduler:
+    post:
+      consumes:
+      - application/json
+      description: Starts or stops the background scheduler based on the given action.
+      parameters:
+      - description: Scheduler action (start|stop)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.SchedulerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SchedulerControlResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Control scheduler
+      tags:
+      - scheduler
+swagger: "2.0"
